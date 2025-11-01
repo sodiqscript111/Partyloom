@@ -36,4 +36,12 @@ export class PartyController {
   ) {
     return this.partySVC.registerUserForParty(partyId, userId);
   }
+
+  @Post(':partyId/unregister')
+  unregisterUser(
+    @Param('partyId') partyId: string,
+    @Body('userId') userId: string,
+  ) {
+    return this.partySVC.unregisterUserFromParty(partyId, userId);
+  }
 }

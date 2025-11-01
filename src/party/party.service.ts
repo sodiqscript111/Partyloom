@@ -61,4 +61,28 @@ export class PartyService {
       },
     });
   }
+
+  async unregisterUserFromParty(partyId: string, userId: string) {
+    // 1️⃣ Check if the party exists
+    const party = await this.prisma.party.findUnique({
+      where: { id: partyId },
+    });
+    if (!party) throw new Error('Party not found');
+
+    // 2️⃣ Check if the user exists
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) throw new Error('User not found');
+
+    // 3️⃣ Check if user is
+    const existing = await this.prisma.partyParticipant.findFirst({
+      where: { partyId, userId },
+    });
+    if (!existing) throw new Error('User not registered for this party');
+
+    return this.prisma.partyParticipant.delete({
+      where: { id: existing.id },
+    });
+  }
 }
