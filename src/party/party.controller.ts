@@ -10,10 +10,10 @@ export class PartyController {
     return this.partySVC.getParties();
   }
 
-@Get(':id')
-getParty(@Param('id') id: string) {
-  return this.partySVC.getPartyById(id);
-}
+  @Get(':id')
+  getParty(@Param('id') id: string) {
+    return this.partySVC.getPartyById(id);
+  }
 
   @Post()
   createParty(
@@ -27,5 +27,13 @@ getParty(@Param('id') id: string) {
     },
   ) {
     return this.partySVC.create(data);
+  }
+
+  @Post(':partyId/register')
+  registerUser(
+    @Param('partyId') partyId: string,
+    @Body('userId') userId: string,
+  ) {
+    return this.partySVC.registerUserForParty(partyId, userId);
   }
 }

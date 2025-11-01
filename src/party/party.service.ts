@@ -23,4 +23,42 @@ export class PartyService {
       where: { id: String(id) },
     });
   }
+
+  async registerUserForParty(partyId: string, userId: string) {
+    // 1️⃣ Check if the party exists
+    const party = await this.prisma.party.findUnique({
+      where: { id: partyId },
+    });
+    if (!party) throw new Error('Party not found');
+
+    // 2️⃣ Check if the user exists
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) throw new Error('User not found');
+
+    // 3️⃣ Check if user already registered
+    const existing = await this.prisma.partyParticipant.findFirst({
+      where: { partyId, userId },
+    });
+    if (existing) throw new Error('User already registered for this party');
+
+    // 4️⃣ Compute amount
+    let amount = 0;
+    if (party.divideEqually) {
+      const totalParticipants = await this.prisma.partyParticipant.count({
+        where: { partyId },
+      });
+      amount = party.totalAmount / (totalParticipants + 1); // +1 for new user
+    }
+
+    // 5️⃣ Create the participant record
+    return this.prisma.partyParticipant.create({
+      data: {
+        userId,
+        partyId,
+        amount,
+      },
+    });
+  }
 }
