@@ -113,4 +113,24 @@ export class PartyService {
       include: { user: true },
     });
   }
+  async getPartyContributionSummary(partyId: string) {
+    const party = await this.prisma.party.findUnique({
+      where: { id: partyId },
+      include: { contributions: true },
+    });
+
+    if (!party) throw new Error('Party not found');
+
+    const totalContributed = party.contributions.reduce(
+      (sum, c) => sum + c.amount,
+      0,
+    );
+    const remaining = party.totalAmount - totalContributed;
+
+    return {
+      totalContributed,
+      remaining,
+      goal: party.totalAmount,
+    };
+  }
 }

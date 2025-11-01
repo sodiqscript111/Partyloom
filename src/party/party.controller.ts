@@ -58,4 +58,9 @@ export class PartyController {
   getPartyContributions(@Param('partyId') partyId: string) {
     return this.partySVC.getPartyContributions(partyId);
   }
+
+  @Get(':partyId/summary')
+  getSummary(@Param('partyId') partyId: string) {
+    return this.partySVC.getPartyContributionSummary(partyId);
+  }
 }
