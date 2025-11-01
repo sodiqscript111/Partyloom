@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param } from '@nestjs/common';
 import { PartyService } from './party.service';
 
 @Controller('party')
@@ -10,7 +10,7 @@ export class PartyController {
     return this.partySVC.getParties();
   }
 
-@Get(':id')              // GET /party/:id
+@Get(':id')
 getParty(@Param('id') id: string) {
   return this.partySVC.getPartyById(id);
 }

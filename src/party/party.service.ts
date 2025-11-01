@@ -20,7 +20,7 @@ export class PartyService {
   }
   getPartyById(id: string) {
     return this.prisma.party.findUnique({
-      where: { id: Number(id) },
+      where: { id: String(id) },
     });
   }
 }
