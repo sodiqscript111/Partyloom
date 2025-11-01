@@ -85,4 +85,25 @@ export class PartyService {
       where: { id: existing.id },
     });
   }
+
+  async contributeToParty(partyId: string, userId: string, amount: number) {
+    const party = await this.prisma.party.findUnique({
+      where: { id: partyId },
+      include: { participants: true },
+    });
+    if (!party) throw new Error('Party not found');
+    const isMember = party.participants.some((p) => p.userId === userId);
+
+    if (!isMember) throw new Error('User is not a member of this party');
+
+    const contribution = await this.prisma.contribution.create({
+      data: {
+        amount,
+        userId,
+        partyId,
+      },
+    });
+
+    return { message: 'Contribution added successfully', contribution };
+  }
 }
