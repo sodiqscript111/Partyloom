@@ -17,6 +17,7 @@ model Party {
   totalAmount   Float
   divideEqually Boolean            @default(false)
   createdAt     DateTime           @default(now())
+  inviteCode    String?            @unique
 
   items         PartyItem[]        // ✅ opposite side for PartyItem
   participants  PartyParticipant[] // ✅ opposite side for PartyParticipant

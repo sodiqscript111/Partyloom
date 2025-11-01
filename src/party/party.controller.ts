@@ -63,4 +63,9 @@ export class PartyController {
   getSummary(@Param('partyId') partyId: string) {
     return this.partySVC.getPartyContributionSummary(partyId);
   }
+
+  @Post(':partyId/invite')
+  generateInvite(@Param('partyId') partyId: string) {
+    return this.partySVC.generateInviteLink(partyId);
+  }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class PartyService {
@@ -131,6 +132,20 @@ export class PartyService {
       totalContributed,
       remaining,
       goal: party.totalAmount,
+    };
+  }
+
+  async generateInviteLink(partyId: string) {
+    const code = randomBytes(6).toString('hex');
+
+    const party = await this.prisma.party.update({
+      where: { id: partyId },
+      data: { inviteCode: code },
+    });
+
+    return {
+      inviteLink: `https://partyloom.app/invite/${code}`,
+      party,
     };
   }
 }
