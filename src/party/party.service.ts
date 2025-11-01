@@ -106,4 +106,11 @@ export class PartyService {
 
     return { message: 'Contribution added successfully', contribution };
   }
+
+  async getPartyContributions(partyId: string) {
+    return this.prisma.contribution.findMany({
+      where: { partyId },
+      include: { user: true },
+    });
+  }
 }

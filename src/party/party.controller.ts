@@ -53,4 +53,9 @@ export class PartyController {
   ) {
     return this.partySVC.contributeToParty(partyId, userId, amount);
   }
+
+  @Get(':partyId/contributions')
+  getPartyContributions(@Param('partyId') partyId: string) {
+    return this.partySVC.getPartyContributions(partyId);
+  }
 }
