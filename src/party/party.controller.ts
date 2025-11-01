@@ -44,4 +44,13 @@ export class PartyController {
   ) {
     return this.partySVC.unregisterUserFromParty(partyId, userId);
   }
+
+  @Post(':partyId/contribute')
+  contributeToParty(
+    @Param('partyId') partyId: string,
+    @Body('userId') userId: string,
+    @Body('amount') amount: number,
+  ) {
+    return this.partySVC.contributeToParty(partyId, userId, amount);
+  }
 }
