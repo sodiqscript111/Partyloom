@@ -68,4 +68,9 @@ export class PartyController {
   generateInvite(@Param('partyId') partyId: string) {
     return this.partySVC.generateInviteLink(partyId);
   }
+
+  @Post('join/:code')
+  joinParty(@Param('code') code: string, @Body('userId') userId: string) {
+    return this.partySVC.joinPartyByInvite(userId, code);
+  }
 }

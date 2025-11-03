@@ -4,10 +4,14 @@ import { AppService } from './app.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PartyModule } from './party/party.module';
 import { UserModule } from './user/user.module';
+import { AiModule } from './ai/ai.module';
+import { AiSummaryService } from './ai_summary/ai_summary.service';
+import { AiSummaryController } from './ai_summary/ai_summary.controller';
+import { AiSummaryModule } from './ai_summary/ai_summary.module';
 
 @Module({
-  imports: [PartyModule, PrismaModule, UserModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [PartyModule, PrismaModule, UserModule, AiModule, AiSummaryModule],
+  controllers: [AppController, AiSummaryController],
+  providers: [AppService, AiSummaryService],
 })
 export class AppModule {}

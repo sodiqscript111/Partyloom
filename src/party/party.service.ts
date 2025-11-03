@@ -148,4 +148,25 @@ export class PartyService {
       party,
     };
   }
+
+  async joinPartyByInvite(userId: string, code: string) {
+    const party = await this.prisma.party.findUnique({
+      where: { inviteCode: code },
+    });
+
+    if (!party) throw new Error('Invalid invite code');
+
+    // Check if user already joined
+    const exists = await this.prisma.partyParticipant.findFirst({
+      where: { userId, partyId: party.id },
+    });
+
+    if (exists) return { message: 'Already a member' };
+
+    const participant = await this.prisma.partyParticipant.create({
+      data: { userId, partyId: party.id, amount: 0 },
+    });
+
+    return { message: 'Joined successfully!', participant };
+  }
 }
