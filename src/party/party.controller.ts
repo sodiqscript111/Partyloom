@@ -1,9 +1,10 @@
-import { Body, Controller, Post, Get, Param } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Delete, Put } from '@nestjs/common';
 import { PartyService } from './party.service';
+import { CreatePartyDto, UpdatePartyDto, CreatePartyItemDto, ContributeDto, RegisterUserDto } from './dto/party.dto';
 
 @Controller('party')
 export class PartyController {
-  constructor(private readonly partySVC: PartyService) {}
+  constructor(private readonly partySVC: PartyService) { }
 
   @Get()
   getAllParty() {
@@ -16,42 +17,26 @@ export class PartyController {
   }
 
   @Post()
-  createParty(
-    @Body()
-    data: {
-      name: string;
-      description?: string;
-      date: Date;
-      totalAmount: number;
-      divideEqually?: boolean;
-    },
-  ) {
-    return this.partySVC.create(data);
+  createParty(@Body() createPartyDto: CreatePartyDto) {
+    return this.partySVC.create({
+      ...createPartyDto,
+      date: new Date(createPartyDto.date),
+    });
   }
 
   @Post(':partyId/register')
-  registerUser(
-    @Param('partyId') partyId: string,
-    @Body('userId') userId: string,
-  ) {
-    return this.partySVC.registerUserForParty(partyId, userId);
+  registerUser(@Param('partyId') partyId: string, @Body() registerUserDto: RegisterUserDto) {
+    return this.partySVC.registerUserForParty(partyId, registerUserDto.userId);
   }
 
   @Post(':partyId/unregister')
-  unregisterUser(
-    @Param('partyId') partyId: string,
-    @Body('userId') userId: string,
-  ) {
-    return this.partySVC.unregisterUserFromParty(partyId, userId);
+  unregisterUser(@Param('partyId') partyId: string, @Body() registerUserDto: RegisterUserDto) {
+    return this.partySVC.unregisterUserFromParty(partyId, registerUserDto.userId);
   }
 
   @Post(':partyId/contribute')
-  contributeToParty(
-    @Param('partyId') partyId: string,
-    @Body('userId') userId: string,
-    @Body('amount') amount: number,
-  ) {
-    return this.partySVC.contributeToParty(partyId, userId, amount);
+  contributeToParty(@Param('partyId') partyId: string, @Body() contributeDto: ContributeDto) {
+    return this.partySVC.contributeToParty(partyId, contributeDto.userId, contributeDto.amount);
   }
 
   @Get(':partyId/contributions')
@@ -70,7 +55,40 @@ export class PartyController {
   }
 
   @Post('join/:code')
-  joinParty(@Param('code') code: string, @Body('userId') userId: string) {
-    return this.partySVC.joinPartyByInvite(userId, code);
+  joinParty(@Param('code') code: string, @Body() registerUserDto: RegisterUserDto) {
+    return this.partySVC.joinPartyByInvite(registerUserDto.userId, code);
+  }
+
+  @Post(':partyId/partyitem')
+  createPartyItem(@Param('partyId') partyId: string, @Body() createPartyItemDto: CreatePartyItemDto) {
+    return this.partySVC.createPartyItem(partyId, createPartyItemDto.name, createPartyItemDto.assignedToId);
+  }
+
+  @Delete(':partyId/partyitem/:itemId')
+  deletePartyItem(@Param('partyId') partyId: string, @Param('itemId') itemId: string) {
+    return this.partySVC.deletePartyItem(partyId, itemId);
+  }
+
+  @Delete(':partyId')
+  deleteParty(@Param('partyId') partyId: string) {
+    return this.partySVC.deleteParty(partyId);
+  }
+
+  @Put(':partyId')
+  updateParty(@Param('partyId') partyId: string, @Body() updatePartyDto: UpdatePartyDto) {
+    return this.partySVC.updateParty(partyId, {
+      ...updatePartyDto,
+      date: updatePartyDto.date ? new Date(updatePartyDto.date) : undefined,
+    });
+  }
+
+  @Get(':partyId/partyitem')
+  getPartyItems(@Param('partyId') partyId: string) {
+    return this.partySVC.getPartyItems(partyId);
+  }
+
+  @Get(':partyId/partyuser')
+  getPartyUsers(@Param('partyId') partyId: string) {
+    return this.partySVC.getPartyUsers(partyId);
   }
 }

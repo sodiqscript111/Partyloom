@@ -19,9 +19,9 @@ model Party {
   createdAt     DateTime           @default(now())
   inviteCode    String?            @unique
 
-  items         PartyItem[]        // ✅ opposite side for PartyItem
-  participants  PartyParticipant[] // ✅ opposite side for PartyParticipant
-   contributions Contribution[]
+  items         PartyItem[]
+  participants  PartyParticipant[]
+  contributions Contribution[]
 }
 
 model User {
@@ -30,35 +30,35 @@ model User {
   email     String   @unique
   createdAt DateTime @default(now())
 
-  items     PartyItem[]
-  parties   PartyParticipant[]
-   contributions Contribution[]
+  items         PartyItem[]
+  parties       PartyParticipant[]
+  contributions Contribution[]
 }
 
 model PartyItem {
-  id           String   @id @default(uuid())
+  id           String  @id @default(uuid())
   name         String
-  assignedTo   User?    @relation(fields: [assignedToId], references: [id])
+  assignedTo   User?   @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
   assignedToId String?
-  party        Party    @relation(fields: [partyId], references: [id])
+  party        Party   @relation(fields: [partyId], references: [id], onDelete: Cascade)
   partyId      String
 }
 
 model PartyParticipant {
-  id       String  @id @default(uuid())
-  user     User    @relation(fields: [userId], references: [id])
-  userId   String
-  party    Party   @relation(fields: [partyId], references: [id])
-  partyId  String
-  amount   Float
+  id      String @id @default(uuid())
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  party   Party  @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  partyId String
+  amount  Float
 }
 
 model Contribution {
   id        String   @id @default(uuid())
   amount    Float
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  party     Party    @relation(fields: [partyId], references: [id])
+  party     Party    @relation(fields: [partyId], references: [id], onDelete: Cascade)
   partyId   String
   createdAt DateTime @default(now())
 }

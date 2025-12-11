@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto';
 
 @Injectable()
 export class PartyService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   getParties() {
     return this.prisma.party.findMany();
@@ -156,7 +156,7 @@ export class PartyService {
 
     if (!party) throw new Error('Invalid invite code');
 
-    // Check if user already joined
+
     const exists = await this.prisma.partyParticipant.findFirst({
       where: { userId, partyId: party.id },
     });
@@ -168,5 +168,42 @@ export class PartyService {
     });
 
     return { message: 'Joined successfully!', participant };
+  }
+
+  async createPartyItem(partyId: string, name: string, assignedToId?: string) {
+    return this.prisma.partyItem.create({
+      data: { partyId, name, assignedToId },
+    });
+  }
+
+  async deletePartyItem(partyId: string, itemId: string) {
+    return this.prisma.partyItem.delete({
+      where: { id: itemId },
+    });
+  }
+
+  async deleteParty(partyId: string) {
+    return this.prisma.party.delete({
+      where: { id: partyId },
+    });
+  }
+
+  async updateParty(partyId: string, data: { name?: string; description?: string; date?: Date; totalAmount?: number; divideEqually?: boolean }) {
+    return this.prisma.party.update({
+      where: { id: partyId },
+      data,
+    });
+  }
+
+  async getPartyItems(partyId: string) {
+    return this.prisma.partyItem.findMany({
+      where: { partyId },
+    });
+}
+
+  async getPartyUsers(partyId: string) {
+    return this.prisma.partyParticipant.findMany({
+      where: { partyId },
+    });   
   }
 }

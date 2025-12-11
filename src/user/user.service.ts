@@ -16,4 +16,12 @@ export class UserService {
   async getUserById(id: string) {
     return this.prisma.user.findUnique({ where: { id } });
   }
+
+  async deleteUser(id: string) {
+    return this.prisma.user.delete({ where: { id } });  
+  }
+
+  async updateUser(id: string, data: { name?: string; email?: string }) {
+    return this.prisma.user.update({ where: { id }, data });
+  }
 }
