@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -26,10 +27,13 @@ Keep responses under 200 words but packed with energy!`;
 export class AiSummaryService {
   private model: ChatGoogleGenerativeAI;
 
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {
     this.model = new ChatGoogleGenerativeAI({
       model: 'gemini-2.0-flash',
-      apiKey: 'AIzaSyAHXMUqbE2nRawRSR3qn_oZ7jRG6PIz44w',
+      apiKey: this.configService.get<string>('GEMINI_API_KEY'),
     });
   }
 
