@@ -65,12 +65,10 @@ export class AiSummaryService {
       throw new Error('Party not found');
     }
 
-    // Calculate stats
     const totalContributed = party.contributions.reduce((sum, c) => sum + c.amount, 0);
     const remaining = party.totalAmount - totalContributed;
     const progressPercent = Math.round((totalContributed / party.totalAmount) * 100);
 
-    // Find top contributor
     const contributionsByUser = party.contributions.reduce((acc, c) => {
       acc[c.userId] = (acc[c.userId] || 0) + c.amount;
       return acc;
@@ -80,7 +78,6 @@ export class AiSummaryService {
       .sort(([, a], [, b]) => b - a)[0]?.[0];
     const topContributor = party.participants.find(p => p.userId === topContributorId)?.user;
 
-    // Build context for AI
     const partyContext = `
 Party Name: ${party.name}
 Description: ${party.description || 'An awesome party!'}

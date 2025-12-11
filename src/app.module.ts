@@ -7,10 +7,12 @@ import { PartyModule } from './party/party.module';
 import { UserModule } from './user/user.module';
 import { AiSummaryModule } from './ai_summary/ai_summary.module';
 import { AuthModule } from './auth/auth.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    RedisModule,
     AuthModule,
     PartyModule,
     PrismaModule,
@@ -21,4 +23,3 @@ import { AuthModule } from './auth/auth.module';
   providers: [AppService],
 })
 export class AppModule { }
-

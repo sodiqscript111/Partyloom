@@ -28,7 +28,7 @@ model User {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
-  password  String   // Hashed password for authentication
+  password  String
   createdAt DateTime @default(now())
 
   items         PartyItem[]
@@ -52,7 +52,7 @@ model PartyParticipant {
   party   Party   @relation(fields: [partyId], references: [id], onDelete: Cascade)
   partyId String
   amount  Float
-  isAdmin Boolean @default(false)  // Party admin can manage participants
+  isAdmin Boolean @default(false)
 }
 
 model Contribution {

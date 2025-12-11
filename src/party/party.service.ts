@@ -23,7 +23,6 @@ export class PartyService {
     return this.prisma.party.create({
       data: {
         ...data,
-        // If a creator is provided, make them an admin participant
         participants: creatorId
           ? {
             create: {
@@ -44,25 +43,21 @@ export class PartyService {
   }
 
   async registerUserForParty(partyId: string, userId: string) {
-    // 1️⃣ Check if the party exists
     const party = await this.prisma.party.findUnique({
       where: { id: partyId },
     });
     if (!party) throw new Error('Party not found');
 
-    // 2️⃣ Check if the user exists
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
     if (!user) throw new Error('User not found');
 
-    // 3️⃣ Check if user already registered
     const existing = await this.prisma.partyParticipant.findFirst({
       where: { partyId, userId },
     });
     if (existing) throw new Error('User already registered for this party');
 
-    // 4️⃣ Compute amount
     let amount = 0;
     if (party.divideEqually) {
       const totalParticipants = await this.prisma.partyParticipant.count({
@@ -71,7 +66,6 @@ export class PartyService {
       amount = party.totalAmount / (totalParticipants + 1); // +1 for new user
     }
 
-    // 5️⃣ Create the participant record
     return this.prisma.partyParticipant.create({
       data: {
         userId,
@@ -82,19 +76,16 @@ export class PartyService {
   }
 
   async unregisterUserFromParty(partyId: string, userId: string) {
-    // 1️⃣ Check if the party exists
     const party = await this.prisma.party.findUnique({
       where: { id: partyId },
     });
     if (!party) throw new Error('Party not found');
 
-    // 2️⃣ Check if the user exists
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
     if (!user) throw new Error('User not found');
 
-    // 3️⃣ Check if user is
     const existing = await this.prisma.partyParticipant.findFirst({
       where: { partyId, userId },
     });
@@ -226,7 +217,6 @@ export class PartyService {
     });
   }
 
-  // Admin-only: Remove a participant from the party
   async removeParticipant(partyId: string, participantUserId: string) {
     const participant = await this.prisma.partyParticipant.findFirst({
       where: { partyId, userId: participantUserId },
@@ -241,7 +231,6 @@ export class PartyService {
     });
   }
 
-  // Admin-only: Promote a user to admin
   async promoteToAdmin(partyId: string, userId: string) {
     const participant = await this.prisma.partyParticipant.findFirst({
       where: { partyId, userId },
@@ -257,7 +246,6 @@ export class PartyService {
     });
   }
 
-  // Admin-only: Demote a user from admin
   async demoteFromAdmin(partyId: string, userId: string) {
     const participant = await this.prisma.partyParticipant.findFirst({
       where: { partyId, userId },
@@ -273,7 +261,6 @@ export class PartyService {
     });
   }
 
-  // Check if a user is an admin of a party
   async isUserAdmin(partyId: string, userId: string): Promise<boolean> {
     const participant = await this.prisma.partyParticipant.findFirst({
       where: { partyId, userId, isAdmin: true },

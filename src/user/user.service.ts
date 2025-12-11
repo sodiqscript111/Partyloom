@@ -6,8 +6,6 @@ import * as bcrypt from 'bcrypt';
 export class UserService {
   constructor(private prisma: PrismaService) { }
 
-  // Note: For normal user creation, use /auth/register endpoint
-  // This is kept for admin/testing purposes with a default password
   async createUser(data: { name: string; email: string }) {
     const hashedPassword = await bcrypt.hash('defaultPassword123', 10);
     return this.prisma.user.create({

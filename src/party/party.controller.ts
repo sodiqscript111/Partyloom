@@ -18,7 +18,6 @@ export class PartyController {
     return this.partySVC.getPartyById(id);
   }
 
-  // Create party - optionally with authenticated user as admin
   @Post()
   createParty(@Body() createPartyDto: CreatePartyDto & { creatorId?: string }) {
     return this.partySVC.create(
@@ -98,9 +97,6 @@ export class PartyController {
     return this.partySVC.getPartyUsers(partyId);
   }
 
-  // ============ ADMIN-ONLY ENDPOINTS ============
-
-  // Admin: Remove a participant from party
   @UseGuards(JwtAuthGuard, PartyAdminGuard)
   @Delete(':partyId/participant/:userId')
   async removeParticipant(
@@ -114,7 +110,6 @@ export class PartyController {
     }
   }
 
-  // Admin: Promote user to admin
   @UseGuards(JwtAuthGuard, PartyAdminGuard)
   @Post(':partyId/admin/:userId')
   async promoteToAdmin(
@@ -128,7 +123,6 @@ export class PartyController {
     }
   }
 
-  // Admin: Demote user from admin
   @UseGuards(JwtAuthGuard, PartyAdminGuard)
   @Delete(':partyId/admin/:userId')
   async demoteFromAdmin(
