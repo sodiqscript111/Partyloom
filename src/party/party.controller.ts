@@ -1,6 +1,8 @@
-import { Body, Controller, Post, Get, Param, Delete, Put } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Delete, Put, UseGuards, Request, HttpException, HttpStatus } from '@nestjs/common';
 import { PartyService } from './party.service';
 import { CreatePartyDto, UpdatePartyDto, CreatePartyItemDto, ContributeDto, RegisterUserDto } from './dto/party.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PartyAdminGuard } from '../auth/guards/party-admin.guard';
 
 @Controller('party')
 export class PartyController {
@@ -16,12 +18,16 @@ export class PartyController {
     return this.partySVC.getPartyById(id);
   }
 
+  // Create party - optionally with authenticated user as admin
   @Post()
-  createParty(@Body() createPartyDto: CreatePartyDto) {
-    return this.partySVC.create({
-      ...createPartyDto,
-      date: new Date(createPartyDto.date),
-    });
+  createParty(@Body() createPartyDto: CreatePartyDto & { creatorId?: string }) {
+    return this.partySVC.create(
+      {
+        ...createPartyDto,
+        date: new Date(createPartyDto.date),
+      },
+      createPartyDto.creatorId,
+    );
   }
 
   @Post(':partyId/register')
@@ -90,5 +96,49 @@ export class PartyController {
   @Get(':partyId/partyuser')
   getPartyUsers(@Param('partyId') partyId: string) {
     return this.partySVC.getPartyUsers(partyId);
+  }
+
+  // ============ ADMIN-ONLY ENDPOINTS ============
+
+  // Admin: Remove a participant from party
+  @UseGuards(JwtAuthGuard, PartyAdminGuard)
+  @Delete(':partyId/participant/:userId')
+  async removeParticipant(
+    @Param('partyId') partyId: string,
+    @Param('userId') userId: string,
+  ) {
+    try {
+      return await this.partySVC.removeParticipant(partyId, userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // Admin: Promote user to admin
+  @UseGuards(JwtAuthGuard, PartyAdminGuard)
+  @Post(':partyId/admin/:userId')
+  async promoteToAdmin(
+    @Param('partyId') partyId: string,
+    @Param('userId') userId: string,
+  ) {
+    try {
+      return await this.partySVC.promoteToAdmin(partyId, userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // Admin: Demote user from admin
+  @UseGuards(JwtAuthGuard, PartyAdminGuard)
+  @Delete(':partyId/admin/:userId')
+  async demoteFromAdmin(
+    @Param('partyId') partyId: string,
+    @Param('userId') userId: string,
+  ) {
+    try {
+      return await this.partySVC.demoteFromAdmin(partyId, userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }

@@ -10,14 +10,32 @@ export class PartyService {
     return this.prisma.party.findMany();
   }
 
-  create(data: {
-    name: string;
-    description?: string;
-    date: Date;
-    totalAmount: number;
-    divideEqually?: boolean;
-  }) {
-    return this.prisma.party.create({ data });
+  create(
+    data: {
+      name: string;
+      description?: string;
+      date: Date;
+      totalAmount: number;
+      divideEqually?: boolean;
+    },
+    creatorId?: string,
+  ) {
+    return this.prisma.party.create({
+      data: {
+        ...data,
+        // If a creator is provided, make them an admin participant
+        participants: creatorId
+          ? {
+            create: {
+              userId: creatorId,
+              amount: 0,
+              isAdmin: true,
+            },
+          }
+          : undefined,
+      },
+      include: { participants: true },
+    });
   }
   getPartyById(id: string) {
     return this.prisma.party.findUnique({
@@ -199,11 +217,67 @@ export class PartyService {
     return this.prisma.partyItem.findMany({
       where: { partyId },
     });
-}
+  }
 
   async getPartyUsers(partyId: string) {
     return this.prisma.partyParticipant.findMany({
       where: { partyId },
-    });   
+      include: { user: true },
+    });
+  }
+
+  // Admin-only: Remove a participant from the party
+  async removeParticipant(partyId: string, participantUserId: string) {
+    const participant = await this.prisma.partyParticipant.findFirst({
+      where: { partyId, userId: participantUserId },
+    });
+
+    if (!participant) {
+      throw new Error('User is not a participant of this party');
+    }
+
+    return this.prisma.partyParticipant.delete({
+      where: { id: participant.id },
+    });
+  }
+
+  // Admin-only: Promote a user to admin
+  async promoteToAdmin(partyId: string, userId: string) {
+    const participant = await this.prisma.partyParticipant.findFirst({
+      where: { partyId, userId },
+    });
+
+    if (!participant) {
+      throw new Error('User is not a participant of this party');
+    }
+
+    return this.prisma.partyParticipant.update({
+      where: { id: participant.id },
+      data: { isAdmin: true },
+    });
+  }
+
+  // Admin-only: Demote a user from admin
+  async demoteFromAdmin(partyId: string, userId: string) {
+    const participant = await this.prisma.partyParticipant.findFirst({
+      where: { partyId, userId },
+    });
+
+    if (!participant) {
+      throw new Error('User is not a participant of this party');
+    }
+
+    return this.prisma.partyParticipant.update({
+      where: { id: participant.id },
+      data: { isAdmin: false },
+    });
+  }
+
+  // Check if a user is an admin of a party
+  async isUserAdmin(partyId: string, userId: string): Promise<boolean> {
+    const participant = await this.prisma.partyParticipant.findFirst({
+      where: { partyId, userId, isAdmin: true },
+    });
+    return !!participant;
   }
 }

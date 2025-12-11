@@ -6,10 +6,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PartyModule } from './party/party.module';
 import { UserModule } from './user/user.module';
 import { AiSummaryModule } from './ai_summary/ai_summary.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }), // Load .env globally
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
     PartyModule,
     PrismaModule,
     UserModule,
@@ -19,3 +21,4 @@ import { AiSummaryModule } from './ai_summary/ai_summary.module';
   providers: [AppService],
 })
 export class AppModule { }
+
