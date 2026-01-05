@@ -1,16 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../../prisma/prisma.service';
 import { randomBytes } from 'crypto';
 
 @Injectable()
 export class PartyService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) { }
 
-  getParties() {
-    return this.prisma.party.findMany();
+  async getParties() {
+    const cacheKey = 'parties:all';
+    const cached = await this.cacheManager.get(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    const parties = await this.prisma.party.findMany();
+    await this.cacheManager.set(cacheKey, parties, 300000);
+    return parties;
   }
 
-  create(
+  async create(
     data: {
       name: string;
       description?: string;
@@ -20,7 +34,7 @@ export class PartyService {
     },
     creatorId?: string,
   ) {
-    return this.prisma.party.create({
+    const party = await this.prisma.party.create({
       data: {
         ...data,
         participants: creatorId
@@ -35,11 +49,27 @@ export class PartyService {
       },
       include: { participants: true },
     });
+
+    await this.cacheManager.del('parties:all');
+    return party;
   }
-  getPartyById(id: string) {
-    return this.prisma.party.findUnique({
+  async getPartyById(id: string) {
+    const cacheKey = `party:${id}`;
+    const cached = await this.cacheManager.get(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    const party = await this.prisma.party.findUnique({
       where: { id: String(id) },
     });
+
+    if (party) {
+      await this.cacheManager.set(cacheKey, party, 300000);
+    }
+
+    return party;
   }
 
   async registerUserForParty(partyId: string, userId: string) {
@@ -63,7 +93,7 @@ export class PartyService {
       const totalParticipants = await this.prisma.partyParticipant.count({
         where: { partyId },
       });
-      amount = party.totalAmount / (totalParticipants + 1); // +1 for new user
+      amount = party.totalAmount / (totalParticipants + 1);
     }
 
     return this.prisma.partyParticipant.create({
@@ -192,16 +222,24 @@ export class PartyService {
   }
 
   async deleteParty(partyId: string) {
-    return this.prisma.party.delete({
+    const result = await this.prisma.party.delete({
       where: { id: partyId },
     });
+
+    await this.cacheManager.del('parties:all');
+    await this.cacheManager.del(`party:${partyId}`);
+    return result;
   }
 
   async updateParty(partyId: string, data: { name?: string; description?: string; date?: Date; totalAmount?: number; divideEqually?: boolean }) {
-    return this.prisma.party.update({
+    const result = await this.prisma.party.update({
       where: { id: partyId },
       data,
     });
+
+    await this.cacheManager.del('parties:all');
+    await this.cacheManager.del(`party:${partyId}`);
+    return result;
   }
 
   async getPartyItems(partyId: string) {

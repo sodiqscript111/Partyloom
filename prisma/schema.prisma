@@ -22,6 +22,9 @@ model Party {
   items         PartyItem[]
   participants  PartyParticipant[]
   contributions Contribution[]
+
+  @@index([date])
+  @@index([inviteCode])
 }
 
 model User {
@@ -29,11 +32,16 @@ model User {
   name      String
   email     String   @unique
   password  String
+  isAdmin   Boolean  @default(false)
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
   items         PartyItem[]
   parties       PartyParticipant[]
   contributions Contribution[]
+
+  @@index([email])
+  @@index([isActive])
 }
 
 model PartyItem {

@@ -1,4 +1,3 @@
-// ai_summary.controller.ts
 import { Controller, Post, Body, Get, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { AiSummaryService } from './ai_summary.service';
 

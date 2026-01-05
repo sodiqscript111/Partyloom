@@ -47,13 +47,17 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        if (!user.isActive) {
+            throw new UnauthorizedException('Account has been suspended');
+        }
+
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const payload = { sub: user.id, email: user.email };
+        const payload = { sub: user.id, email: user.email, isAdmin: user.isAdmin };
         const accessToken = this.jwtService.sign(payload);
 
         return {
@@ -62,6 +66,7 @@ export class AuthService {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                isAdmin: user.isAdmin,
             },
         };
     }
