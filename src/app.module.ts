@@ -12,6 +12,7 @@ import { AiSummaryModule } from './ai_summary/ai_summary.module';
 import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { AdminModule } from './admin/admin.module';
+import { PaystackModule } from './paystack/paystack.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AdminModule } from './admin/admin.module';
     UserModule,
     AiSummaryModule,
     AdminModule,
+    PaystackModule,
   ],
   controllers: [AppController],
   providers: [AppService],

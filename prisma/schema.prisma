@@ -22,6 +22,7 @@ model Party {
   items         PartyItem[]
   participants  PartyParticipant[]
   contributions Contribution[]
+  payments      Payment[]
 
   @@index([date])
   @@index([inviteCode])
@@ -39,6 +40,7 @@ model User {
   items         PartyItem[]
   parties       PartyParticipant[]
   contributions Contribution[]
+  payments      Payment[]
 
   @@index([email])
   @@index([isActive])
@@ -71,4 +73,31 @@ model Contribution {
   party     Party    @relation(fields: [partyId], references: [id], onDelete: Cascade)
   partyId   String
   createdAt DateTime @default(now())
+  payment   Payment?
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  reference       String   @unique
+  idempotencyKey  String   @unique
+  amount          Float
+  email           String
+  status          String   @default("pending")
+  paystackRef     String?
+  callbackUrl     String?
+  metadata        Json?
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  party           Party    @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  partyId         String
+  contribution    Contribution? @relation(fields: [contributionId], references: [id])
+  contributionId  String?  @unique
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([idempotencyKey])
+  @@index([reference])
+  @@index([status])
 }
